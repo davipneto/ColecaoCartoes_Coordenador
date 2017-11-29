@@ -17,5 +17,6 @@ public interface InterfaceColecionador extends Remote {
     public boolean desejaEfetivar() throws RemoteException;
     public void efetivar() throws RemoteException;
     public void abordar() throws RemoteException;
+    public Colecao getColecao() throws RemoteException;
     
 }
