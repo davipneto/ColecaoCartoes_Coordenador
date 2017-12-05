@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoordenador {
 
     public Map<Long, InterfaceColecionador> colecionadores = new HashMap<>();
+    public int trans = 0;
 
     public CoordenadorImpl() throws RemoteException {
         //cria um registro do servidor no serviço de nomes na porta 1099
@@ -32,17 +33,17 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
     }
 
     @Override
-    public void efetivacaoOk() throws RemoteException {
-        System.out.println("Deu certo chamar coordenador");
+    public void efetivacaoOk(int transacao) throws RemoteException {
+        
     }
 
     @Override
-    public void obterDecisao() throws RemoteException {
+    public void obterDecisao(int transacao) throws RemoteException {
 
     }
 
     @Override
-    public List<Colecao> consultarColecoes() throws RemoteException {
+    public List<Colecao> consultarColecoes(int transacao) throws RemoteException {
         System.out.println("Comecou a transacao");
         List<Colecao> colecoes = new ArrayList();
         List<Thread> threads = new ArrayList();
@@ -80,14 +81,14 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
     }
 
     @Override
-    public long registraColecionador(InterfaceColecionador col) throws RemoteException {
+    public long registraColecionador(int transacao, InterfaceColecionador col) throws RemoteException {
         long id = System.currentTimeMillis();
         colecionadores.put(id, col);
         return id;
     }
 
     @Override
-    public void trocarCartoes(Colecao.Cartao tipo1, Colecao.Cartao tipo2, Integer qntd1, Integer qntd2, Long id_colec1, Long id_colec2) throws RemoteException {
+    public void trocarCartoes(int transacao, Colecao.Cartao tipo1, Colecao.Cartao tipo2, Integer qntd1, Integer qntd2, Long id_colec1, Long id_colec2) throws RemoteException {
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -113,29 +114,12 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                         }
                     }
                 }
-                if (!trans1) {
-                    System.out.println("Remover 1 deu errado");
-                } else {
-                    System.out.println("Remover 1 deu certo");
-                }
-                if (!trans2) {
-                    System.out.println("Inserir 1 deu errado");
-                } else {
-                    System.out.println("Inserir 1 deu certo");
-                }
-                if (!trans3) {
-                    System.out.println("Remover 2 deu errado");
-                } else {
-                    System.out.println("Remover 2 deu certo");
-                }
-                if (!trans4) {
-                    System.out.println("Inserir 2 deu errado");
-                } else {
-                    System.out.println("Inserir 2 deu certo");
+                if (!trans1 || trans2 || !trans3 || !trans4) {
+                    System.out.println("Alguma transação deu errado\nDesfazer últimas transações!");
+                    
                 }
             }
         };
         t.start();
     }
-
 }
