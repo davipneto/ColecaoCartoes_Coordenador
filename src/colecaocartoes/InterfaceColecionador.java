@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package colecaocartoes_coordenador;
+package colecaocartoes;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import java.rmi.*;
 
 /**
  *
@@ -16,7 +15,9 @@ public interface InterfaceColecionador extends Remote {
     
     public boolean desejaEfetivar() throws RemoteException;
     public void efetivar() throws RemoteException;
-    public void abordar() throws RemoteException;
+    public void abortar() throws RemoteException;
+    public boolean removerCartão(Colecao.Cartao cartao, Integer qntd) throws RemoteException;
+    public boolean inserirCartão(Colecao.Cartao cartao, Integer qntd) throws RemoteException;
     public Colecao getColecao() throws RemoteException;
     
 }
