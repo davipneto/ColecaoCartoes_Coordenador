@@ -69,6 +69,8 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
      */
     @Override
     public List<Colecao> consultarColecoes(int transacao) throws RemoteException {
+        int transs = trans;
+        trans++;
         List<Colecao> colecoes = new ArrayList();
         List<Thread> threads = new ArrayList();
         for (InterfaceColecionador col : colecionadores.values()) {
@@ -77,7 +79,7 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                 public void run() {
                     System.out.println("Start Get colecao Interface " + col.toString());
                     try {
-                        colecoes.add(col.getColecao(transacao));
+                        colecoes.add(col.getColecao(transs));
                         System.out.println("Finish Get colecao Interface " + col.toString());
                     } catch (RemoteException ex) {
                         Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
@@ -136,6 +138,8 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
      */
     @Override
     public void trocarCartoes(int transacao, Colecao.Cartao tipo1, Colecao.Cartao tipo2, Integer qntd1, Integer qntd2, Long id_colec1, Long id_colec2) throws RemoteException {
+        int transs = trans;
+        trans++;
         //cria thread que tentará realizar troca de cartões
         System.out.println("Id Colecionador 1: " + id_colec1);
         System.out.println("Id colecionador 2: " + id_colec2);
@@ -163,9 +167,9 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                     try {
                         //pergunta ao colecionador 1 se deseja efetivar a transação
                         //remove cartão 1 do colecionador 1 e atualiza status da transação
-                        trans1 = colecionador1.desejaEfetivar(transacao, "remover", tipo1, qntd1);
+                        trans1 = colecionador1.desejaEfetivar(transs, "remover", tipo1, qntd1);
                         //inserte cartão 2 no colecionado 1 e atualiza status da transação
-                        trans2 = colecionador1.desejaEfetivar(transacao, "inserir", tipo2, qntd2);
+                        trans2 = colecionador1.desejaEfetivar(transs, "inserir", tipo2, qntd2);
                     } catch (RemoteException ex) {
                         Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -176,9 +180,9 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                 if (colecionador2 != null) {
                     try {
                         //remove cartão 2 do colecionador 2 e atualiza status da transação
-                        trans3 = colecionador2.desejaEfetivar(transacao, "remover", tipo2, qntd2);
+                        trans3 = colecionador2.desejaEfetivar(transs, "remover", tipo2, qntd2);
                         //inserte cartão 1 no colecionado 2 e atualiza status da transação
-                        trans4 = colecionador2.desejaEfetivar(transacao, "inserir", tipo1, qntd1);
+                        trans4 = colecionador2.desejaEfetivar(transs, "inserir", tipo1, qntd1);
                     } catch (RemoteException ex) {
                         Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -192,14 +196,14 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                     System.out.println("Alguma transação deu errado\nDesfazer últimas transações!");
                     if (colecionador1 != null) {
                         try {
-                            colecionador1.abortar(transacao);
+                            colecionador1.abortar(transs);
                         } catch (RemoteException ex) {
                             Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                     if (colecionador2 != null) {
                         try {
-                            colecionador2.abortar(transacao);
+                            colecionador2.abortar(transs);
                         } catch (RemoteException ex) {
                             Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -208,14 +212,14 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                 } else {
                     if (colecionador1 != null) {
                         try {
-                            colecionador1.efetivar(transacao);
+                            colecionador1.efetivar(transs);
                         } catch (RemoteException ex) {
                             Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                     if (colecionador2 != null) {
                         try {
-                            colecionador2.efetivar(transacao);
+                            colecionador2.efetivar(transs);
                         } catch (RemoteException ex) {
                             Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                         }
