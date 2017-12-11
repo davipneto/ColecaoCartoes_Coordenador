@@ -39,36 +39,13 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
     }
 
     /**
-     * Método que efetiva uma transação.
-     *
-     * @param transacao com o número da transação
-     * @throws RemoteException
-     */
-    @Override
-    public void efetivacaoOk(int transacao) throws RemoteException {
-
-    }
-
-    /**
-     * Método que pergunta aos colecionadores se pode ou não efetivar transação.
-     *
-     * @param transacao com o número da transação
-     * @throws RemoteException
-     */
-    @Override
-    public void obterDecisao(int transacao) throws RemoteException {
-
-    }
-
-    /**
      * Consulta as Coleções de todos os Colecionadores do Sistema.
      *
-     * @param transacao com o número da transação
      * @return uma lista de colecoes
      * @throws RemoteException
      */
     @Override
-    public List<Colecao> consultarColecoes(int transacao) throws RemoteException {
+    public List<Colecao> consultarColecoes() throws RemoteException {
         int transs = trans;
         trans++;
         List<Colecao> colecoes = new ArrayList();
@@ -109,13 +86,12 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
     /**
      * Registra o colecionador no sistema.
      *
-     * @param transacao com o número da transação
      * @param col a interface do colecionador
      * @return um id único para o colecionador
      * @throws RemoteException
      */
     @Override
-    public long registraColecionador(int transacao, InterfaceColecionador col) throws RemoteException {
+    public long registraColecionador(InterfaceColecionador col) throws RemoteException {
         //cria um id com base no tempo de sistema
         long id = System.currentTimeMillis();
         //adiciona colecionador e id no map
@@ -127,7 +103,6 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
     /**
      * Método que realiza a troca de cartões entre os colecionadores.
      *
-     * @param transacao com o número da transação
      * @param tipo1 com o tipo de cartão a ser trocado
      * @param tipo2 com o tipo de cartão a ser trocado
      * @param qntd1 com a quantidade a ser trocada
@@ -137,7 +112,7 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
      * @throws RemoteException
      */
     @Override
-    public void trocarCartoes(int transacao, Colecao.Cartao tipo1, Colecao.Cartao tipo2, Integer qntd1, Integer qntd2, Long id_colec1, Long id_colec2) throws RemoteException {
+    public void trocarCartoes(Colecao.Cartao tipo1, Colecao.Cartao tipo2, Integer qntd1, Integer qntd2, Long id_colec1, Long id_colec2) throws RemoteException {
         int transs = trans;
         trans++;
         //cria thread que tentará realizar troca de cartões
