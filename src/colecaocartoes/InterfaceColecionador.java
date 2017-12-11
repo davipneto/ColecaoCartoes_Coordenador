@@ -15,10 +15,13 @@ public interface InterfaceColecionador extends Remote {
      * Método para verificar se o colecionador deseja efetivar a transação.
      *
      * @param transacao com o número da transação
+     * @param tipoTransacao com o tipo de transação a ser realizada
+     * @param cartao com o tipo de cartão a ser transacionado
+     * @param qntd com a quantidade a ser transacionado
      * @return boolean com a decisão do colecionador
      * @throws RemoteException
      */
-    public boolean desejaEfetivar(int transacao) throws RemoteException;
+    public boolean desejaEfetivar(int transacao, String tipoTransacao, Colecao.Cartao cartao, Integer qntd) throws RemoteException;
 
     /**
      * Método para efetivar uma transação.

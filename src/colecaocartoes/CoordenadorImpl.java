@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  * A classe CoordenadorImpl implementa os métodos remotos da
@@ -136,6 +137,8 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
     @Override
     public void trocarCartoes(int transacao, Colecao.Cartao tipo1, Colecao.Cartao tipo2, Integer qntd1, Integer qntd2, Long id_colec1, Long id_colec2) throws RemoteException {
         //cria thread que tentará realizar troca de cartões
+        System.out.println("Id Colecionador 1: " + id_colec1);
+        System.out.println("Id colecionador 2: " + id_colec2);
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -144,38 +147,87 @@ public class CoordenadorImpl extends UnicastRemoteObject implements InterfaceCoo
                 boolean trans2 = false;
                 boolean trans3 = false;
                 boolean trans4 = false;
+                InterfaceColecionador colecionador1 = null;
+                InterfaceColecionador colecionador2 = null;
                 //para todo colecionador
                 for (Long id : colecionadores.keySet()) {
                     //se o id é igual ao colecionador 1
                     if (id.equals(id_colec1)) {
-                        try {
-                            //remove cartão 1 do colecionador 1 e atualiza status da transação
-                            trans1 = colecionadores.get(id).removerCartão(transacao, tipo1, qntd1);
-                            //inserte cartão 2 no colecionado 1 e atualiza status da transação
-                            trans2 = colecionadores.get(id).inserirCartão(transacao, tipo2, qntd2);
-                        } catch (RemoteException ex) {
-                            Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } //se o id é igual ao colecionador 2
+                        colecionador1 = colecionadores.get(id);
+                    }//se o id é igual ao colecionador 2
                     else if (id.equals(id_colec2)) {
+                        colecionador2 = colecionadores.get(id);
+                    }
+                }
+                if (colecionador1 != null) {
+                    try {
+                        //pergunta ao colecionador 1 se deseja efetivar a transação
+                        //remove cartão 1 do colecionador 1 e atualiza status da transação
+                        trans1 = colecionador1.desejaEfetivar(transacao, "remover", tipo1, qntd1);
+                        //inserte cartão 2 no colecionado 1 e atualiza status da transação
+                        trans2 = colecionador1.desejaEfetivar(transacao, "inserir", tipo2, qntd2);
+                    } catch (RemoteException ex) {
+                        Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } //se o id é igual ao colecionador 2
+                else{
+                    System.out.println("nao achou 1");
+                }
+                if (colecionador2 != null) {
+                    try {
+                        //remove cartão 2 do colecionador 2 e atualiza status da transação
+                        trans3 = colecionador2.desejaEfetivar(transacao, "remover", tipo2, qntd2);
+                        //inserte cartão 1 no colecionado 2 e atualiza status da transação
+                        trans4 = colecionador2.desejaEfetivar(transacao, "inserir", tipo1, qntd1);
+                    } catch (RemoteException ex) {
+                        Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }else{
+                    System.out.println("nao achou 2");
+                }
+               
+
+                //se alguma das transações deram errado
+                if (!trans1 || !trans2 || !trans3 || !trans4) {
+                    System.out.println("Alguma transação deu errado\nDesfazer últimas transações!");
+                    if (colecionador1 != null) {
                         try {
-                            //remove cartão 2 do colecionador 2 e atualiza status da transação
-                            trans3 = colecionadores.get(id).removerCartão(transacao, tipo2, qntd2);
-                            //inserte cartão 1 no colecionado 2 e atualiza status da transação
-                            trans4 = colecionadores.get(id).inserirCartão(transacao, tipo1, qntd1);
+                            colecionador1.abortar(transacao);
                         } catch (RemoteException ex) {
                             Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
+                    if (colecionador2 != null) {
+                        try {
+                            colecionador2.abortar(transacao);
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    JOptionPane.showMessageDialog(null, "Transação não efetivada");
+                } else {
+                    if (colecionador1 != null) {
+                        try {
+                            colecionador1.efetivar(transacao);
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    if (colecionador2 != null) {
+                        try {
+                            colecionador2.efetivar(transacao);
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(CoordenadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    JOptionPane.showMessageDialog(null, "Transação efetivada");
                 }
-                //se alguma das transações deram errado
-                if (!trans1 || trans2 || !trans3 || !trans4) {
-                    System.out.println("Alguma transação deu errado\nDesfazer últimas transações!");
 
-                }
             }
         };
+
         //inicia thread
         t.start();
     }
+
 }
